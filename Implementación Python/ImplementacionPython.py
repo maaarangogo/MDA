@@ -45,29 +45,26 @@ palabras=modeloTemas.show_topic(1, 64)
 print(words)
 
 #Comparación de documentos por temas
-#Después de haber partido de una lista de palabras y documentos y elaborado un vector de temas
+
+#Se genera vectores de NumPy con los temas de todos los documentos en el corpus para calcular las distancias entre cada documento
 from gensim import matutils
 topics = matutils.corpus2dense(modeloTemas[corpus], num_terms=modeloTemas.num_topics)
 
-#Now, topics is a matrix of topics. We can use the pdist function in SciPy to
-#compute all pairwise distances. That is, with a single function call, we compute
-#all the values of sum((topics[ti] – topics[tj])**2) :
+#topics es una matriz y podemos usar la función pdist de SciPy para calcular las distancias por parejas. Con un llamado a la función, se están calculando todos los valores de sum((topics[ti] – topics[tj])**2):
 from scipy.spatial import distance
 pairwise = distance.squareform(distance.pdist(topics))
 
-# Now, we will employ one last little trick; we will set the diagonal elements of the
-# distance matrix to a high value (it just needs to be larger than the other values in
-# the matrix):
+#Ahora se ajusta un poco la matriz de distancias modificando los elementos e la diagonal para que sean más grandes que la distancia más grande. Sin este ajuste, la función a continuación siempre retornaría el mismo documento como el más cercano
 largest = pairwise.max()
 for ti in range(len(topics)):
 	pairwise[ti,ti] = largest+1
 
-# And we are done! For each document, we can look up the closest element easily (this
-# is a type of nearest neighbor classifier):
+#Por último construímos un clasificador de temas por proximidad (distancia más baja). Documentación de NumPy.argmin(): http://docs.scipy.org/doc/numpy-1.10.1/reference/generated/numpy.argmin.html
 def closest_to(doc_id):
 	return pairwise[doc_id].argmin()
 
-#Defclose
+#Obtener el documento más parecido a aquel con ID 1:
+closest_to(1)
 
 
 #Fuentes:
